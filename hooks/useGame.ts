@@ -91,8 +91,21 @@ export function useGame() {
   useEffect(() => {
     if (!isLoaded || gameState.status === "idle") return;
 
+    // Only save if user has made at least one move
+    if (gameState.moves === 0) return;
+
+    // Sanitize state: reset isFlipped for unmatched cards
+    // This prevents flipped but unmatched cards from appearing revealed on reload
+    const sanitizedState: GameState = {
+      ...gameState,
+      cards: gameState.cards.map(card => ({
+        ...card,
+        isFlipped: card.isMatched // Only matched cards stay flipped
+      }))
+    };
+
     // Local Save
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedState));
 
     // Cloud Save (Debounced)
     const userId = localStorage.getItem("memory_game_user_id");
@@ -103,7 +116,7 @@ export function useGame() {
             .from("game_progress")
             .upsert({ 
               user_id: userId, 
-              state: gameState,
+              state: sanitizedState,
               updated_at: new Date().toISOString()
             });
         } catch (error) {
@@ -227,16 +240,29 @@ export function useGame() {
     }
   }, [flippedCards, isLocked, highScores]);
 
-  const goToMenu = () => {
+  const goToMenu = async () => {
+    // If no moves have been made, clear saved state
+    if (gameState.moves === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      
+      // Clear cloud save
+      const userId = localStorage.getItem("memory_game_user_id");
+      if (userId) {
+        try {
+          await supabase
+            .from("game_progress")
+            .delete()
+            .eq("user_id", userId);
+        } catch (error) {
+          console.error("Failed to clear cloud save", error);
+        }
+      }
+    }
+    
     setGameState(prev => ({ ...prev, status: "idle" }));
     setFlippedCards([]);
     setMismatchedCards([]);
     setIsLocked(false);
-    
-    // Clear cloud save on exit? Or keep it?
-    // Let's keep it so they can resume later if they want.
-    // But if they explicitly quit, maybe we should clear it?
-    // For now, let's just set status to idle in local state.
   };
 
   return {

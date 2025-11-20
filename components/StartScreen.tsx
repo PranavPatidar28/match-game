@@ -3,6 +3,7 @@ import { Difficulty, Theme } from "@/types";
 import { Upload, Loader2, Cloud, Images } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { ImageSelector } from "./ImageSelector";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 interface StartScreenProps {
   onStart: (name: string, difficulty: Difficulty, customImages?: string[]) => void;
@@ -83,82 +84,88 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] w-full max-w-md mx-auto p-8 bg-white rounded-3xl shadow-xl border border-gray-100">
-      <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
-        Memory Match
-      </h1>
-      <p className="text-gray-500 mb-8">Train your brain with a classic puzzle</p>
+    <div className="flex flex-col items-center justify-center min-h-[70vh] w-full max-w-md mx-auto p-8 glass-panel rounded-3xl animate-in fade-in zoom-in duration-500">
+      <div className="mb-8 text-center w-full">
+        
+        <h1 className="text-5xl font-extrabold text-gradient mb-3 animate-[float_6s_ease-in-out_infinite]">
+          Memory Match
+        </h1>
+        <p className="text-[var(--foreground)]/70 text-lg">Train your brain in style</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="w-full space-y-6">
         <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)]/80 ml-1">
             Player Name
           </label>
-          <div className="relative">
+          <div className="relative group">
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+              className="w-full px-4 py-3.5 pl-11 rounded-xl bg-white/60 border border-white/40 text-[var(--foreground)] placeholder-[var(--foreground)]/40 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all"
               placeholder="Enter your name"
               required
             />
-            <Cloud className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Cloud className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--foreground)]/40 group-focus-within:text-[var(--color-primary)] transition-colors" size={20} />
           </div>
-          <p className="text-xs text-gray-400 text-right">Synced to Cloud ☁️</p>
+          <p className="text-xs text-[var(--foreground)]/60 text-right flex items-center justify-end gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Synced to Cloud
+          </p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Difficulty</label>
+          <label className="block text-sm font-medium text-[var(--foreground)]/80 ml-1">Difficulty</label>
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => setDifficulty("4x4")}
-              className={`p-4 rounded-xl border-2 transition-all ${
+              className={`p-4 rounded-xl border transition-all duration-300 ${
                 difficulty === "4x4"
-                  ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                  : "border-gray-200 hover:border-gray-300 text-gray-600"
+                  ? "bg-[var(--color-primary)]/20 border-[var(--color-primary)] text-[var(--foreground)] shadow-[0_0_20px_var(--color-primary)]"
+                  : "bg-white/40 border-white/40 text-[var(--foreground)]/60 hover:bg-white/60 hover:border-white/60"
               }`}
             >
-              <span className="block text-lg font-bold">4 × 4</span>
-              <span className="text-xs opacity-75">Easy (16 tiles)</span>
+              <span className="block text-2xl font-bold mb-1">4 × 4</span>
+              <span className="text-xs opacity-75 font-medium">Easy (16 tiles)</span>
               {highScores["4x4"].moves !== Infinity && (
-                <span className="block text-xs font-medium text-indigo-500 mt-1">
-                  Best: {highScores["4x4"].moves} moves
-                </span>
+                <div className="mt-2 py-1 px-2 bg-white/50 rounded text-[10px] font-medium text-emerald-600 inline-block">
+                  Best: {highScores["4x4"].moves}
+                </div>
               )}
             </button>
             <button
               type="button"
               onClick={() => setDifficulty("6x6")}
-              className={`p-4 rounded-xl border-2 transition-all ${
+              className={`p-4 rounded-xl border transition-all duration-300 ${
                 difficulty === "6x6"
-                  ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                  : "border-gray-200 hover:border-gray-300 text-gray-600"
+                  ? "bg-[var(--color-primary)]/20 border-[var(--color-primary)] text-[var(--foreground)] shadow-[0_0_20px_var(--color-primary)]"
+                  : "bg-white/40 border-white/40 text-[var(--foreground)]/60 hover:bg-white/60 hover:border-white/60"
               }`}
             >
-              <span className="block text-lg font-bold">6 × 6</span>
-              <span className="text-xs opacity-75">Hard (36 tiles)</span>
+              <span className="block text-2xl font-bold mb-1">6 × 6</span>
+              <span className="text-xs opacity-75 font-medium">Hard (36 tiles)</span>
               {highScores["6x6"].moves !== Infinity && (
-                <span className="block text-xs font-medium text-indigo-500 mt-1">
-                  Best: {highScores["6x6"].moves} moves
-                </span>
+                <div className="mt-2 py-1 px-2 bg-white/50 rounded text-[10px] font-medium text-emerald-600 inline-block">
+                  Best: {highScores["6x6"].moves}
+                </div>
               )}
             </button>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Theme</label>
+        <label className="block text-sm font-medium text-[var(--foreground)]/80 ml-1">Tiles</label>
           <div className="flex gap-4">
             <button
               type="button"
               onClick={() => setTheme(DEFAULT_THEME)}
-              className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+              className={`flex-1 p-3.5 rounded-xl border transition-all duration-300 font-medium ${
                 theme.id === 'default'
-                  ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                  : "border-gray-200 hover:border-gray-300 text-gray-600"
+                  ? "bg-[var(--color-primary)]/20 border-[var(--color-primary)] text-[var(--foreground)] shadow-[0_0_20px_var(--color-primary)]"
+                  : "bg-white/40 border-white/40 text-[var(--foreground)]/60 hover:bg-white/60 hover:border-white/60"
               }`}
             >
               Default
@@ -169,10 +176,10 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
                 setTheme({ id: 'custom', name: 'Custom Uploads', type: 'custom', src: [] });
                 setIsImageSelectorOpen(true);
               }}
-              className={`flex-1 p-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 p-3.5 rounded-xl border transition-all duration-300 flex items-center justify-center gap-2 font-medium ${
                 theme.id === 'custom'
-                  ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                  : "border-gray-200 hover:border-gray-300 text-gray-600"
+                  ? "bg-[var(--color-primary)]/20 border-[var(--color-primary)] text-[var(--foreground)] shadow-[0_0_20px_var(--color-primary)]"
+                  : "bg-white/40 border-white/40 text-[var(--foreground)]/60 hover:bg-white/60 hover:border-white/60"
               }`}
             >
               <Images size={18} />
@@ -181,21 +188,26 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
           </div>
           
           {theme.id === 'custom' && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[var(--foreground)]/60 ml-1">
               {customImages.length} images selected. 
               {customImages.length < (difficulty === '4x4' ? 8 : 18) && (
-                <span className="text-indigo-600 ml-1">
+                <span className="text-[var(--color-primary)] ml-1">
                   (Remaining tiles will use default icons)
                 </span>
               )}
             </p>
           )}
+
+          <label className="block text-sm font-medium text-[var(--foreground)]/80 ml-1">Theme</label>
+          <div className="flex justify-center mb-4">
+          <ThemeSwitcher />
+            </div>
         </div>
 
         <button
           type="submit"
           disabled={!name.trim()}
-          className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform transition-all active:scale-[0.98]"
+          className="w-full py-4 bg-gradient-to-r from-[var(--gradient-button-from)] to-[var(--gradient-button-to)] text-white font-bold rounded-xl shadow-lg hover:shadow-[var(--gradient-button-from)]/30 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
           Start Game
         </button>

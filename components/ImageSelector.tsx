@@ -146,29 +146,29 @@ export function ImageSelector({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground)]/20 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="glass-panel rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-white/40 shadow-2xl">
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+        <div className="p-6 border-b border-white/20 flex items-center justify-between z-10 bg-white/30">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Manage Images</h2>
-            <p className="text-sm text-gray-500">
-              Selected: <span className="font-bold text-indigo-600">{selectedImages.length}</span> images
+            <h2 className="text-2xl font-bold text-[var(--foreground)]">Manage Images</h2>
+            <p className="text-sm text-[var(--foreground)]/60">
+              Selected: <span className="font-bold text-[var(--color-primary)]">{selectedImages.length}</span> images
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-white/40 rounded-full transition-colors text-[var(--foreground)]/60 hover:text-[var(--foreground)]"
           >
-            <X size={24} className="text-gray-500" />
+            <X size={24} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white/20">
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="animate-spin text-indigo-600" size={48} />
+              <Loader2 className="animate-spin text-[var(--color-primary)]" size={48} />
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
@@ -176,16 +176,16 @@ export function ImageSelector({
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="aspect-square rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50 hover:bg-indigo-100 flex flex-col items-center justify-center gap-2 transition-all group"
+                className="aspect-square rounded-xl border-2 border-dashed border-[var(--color-primary)]/40 bg-white/40 hover:bg-white/60 flex flex-col items-center justify-center gap-2 transition-all group"
               >
                 {isUploading ? (
-                  <Loader2 className="animate-spin text-indigo-600" size={32} />
+                  <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
                 ) : (
                   <>
-                    <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                      <Upload className="text-indigo-600" size={24} />
+                    <div className="p-3 bg-white/50 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                      <Upload className="text-[var(--color-primary)]" size={24} />
                     </div>
-                    <span className="text-sm font-medium text-indigo-700">Upload New</span>
+                    <span className="text-sm font-medium text-[var(--foreground)]/80">Upload New</span>
                   </>
                 )}
               </button>
@@ -197,10 +197,10 @@ export function ImageSelector({
                   <div
                     key={upload.id}
                     className={cn(
-                      "group relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer",
+                      "group relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer shadow-sm",
                       isSelected
-                        ? "border-indigo-600 ring-2 ring-indigo-200 ring-offset-2"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20 ring-offset-2 ring-offset-transparent"
+                        : "border-white/40 hover:border-white/60"
                     )}
                     onClick={() => toggleSelection(upload.url)}
                   >
@@ -213,10 +213,10 @@ export function ImageSelector({
                     {/* Selection Indicator */}
                     <div
                       className={cn(
-                        "absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all shadow-sm",
+                        "absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all shadow-sm backdrop-blur-sm",
                         isSelected
-                          ? "bg-indigo-600 text-white scale-100"
-                          : "bg-white/80 text-transparent border border-gray-200 scale-90 group-hover:scale-100"
+                          ? "bg-[var(--color-primary)] text-white scale-100"
+                          : "bg-white/60 text-transparent border border-white/40 scale-90 group-hover:scale-100"
                       )}
                     >
                       <Check size={14} strokeWidth={3} />
@@ -229,12 +229,12 @@ export function ImageSelector({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between gap-3">
+        <div className="p-6 border-t border-white/20 flex items-center justify-between gap-3 bg-white/30">
           <div>
             {selectedImages.length > 0 && (
               <button
                 onClick={handleBulkDelete}
-                className="px-4 py-2.5 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 bg-red-500/10 text-red-600 font-semibold rounded-xl hover:bg-red-500/20 transition-colors flex items-center gap-2 border border-red-500/20"
               >
                 <Trash2 size={18} />
                 Delete Selected ({selectedImages.length})
@@ -244,13 +244,13 @@ export function ImageSelector({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+              className="px-6 py-2.5 bg-white/40 text-[var(--foreground)] font-semibold rounded-xl hover:bg-white/60 transition-colors border border-white/20"
             >
               Cancel
             </button>
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95"
+              className="px-6 py-2.5 bg-gradient-to-r from-[var(--gradient-button-from)] to-[var(--gradient-button-to)] text-white font-bold rounded-xl hover:shadow-lg hover:shadow-[var(--gradient-button-from)]/20 transition-all active:scale-95"
             >
               Done ({selectedImages.length})
             </button>
@@ -268,4 +268,4 @@ export function ImageSelector({
       </div>
     </div>
   );
-  }
+} 

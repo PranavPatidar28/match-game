@@ -55,7 +55,7 @@ export function Tile({ card, onClick, disabled, isShaking }: TileProps) {
   return (
     <div
       className={cn(
-        "relative aspect-square cursor-pointer perspective-1000 group transition-transform",
+        "relative aspect-square cursor-pointer perspective-1000 group transition-transform duration-300",
         (card.isFlipped || card.isMatched) && "pointer-events-none",
         isShaking && "animate-shake"
       )}
@@ -67,30 +67,32 @@ export function Tile({ card, onClick, disabled, isShaking }: TileProps) {
     >
       <div
         className={cn(
-          "w-full h-full transition-all duration-500 transform-style-3d",
-          (card.isFlipped || card.isMatched) ? "rotate-y-180" : ""
+          "w-full h-full transition-all duration-500 transform-style-3d shadow-xl",
+          (card.isFlipped || card.isMatched) ? "rotate-y-180" : "group-hover:scale-[1.05]"
         )}
       >
         {/* Front (Hidden state) */}
-        <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center border-2 border-indigo-400/30 group-hover:scale-[1.02] transition-transform">
-          <span className="text-4xl font-bold text-white/20">?</span>
+        <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-[var(--gradient-card-from)] to-[var(--gradient-card-to)] rounded-xl shadow-inner border border-white/20 flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10 mix-blend-overlay"></div>
+          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
+            <span className="text-2xl font-bold text-white/80">?</span>
+          </div>
         </div>
 
         {/* Back (Revealed state) */}
-        <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200 flex items-center justify-center p-2">
+        <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-[var(--color-primary)]/30 flex items-center justify-center p-3">
           {(card.value || '').startsWith('http') || (card.value || '').startsWith('/') ? (
              // Custom Image
              // eslint-disable-next-line @next/next/no-img-element
              <img 
                src={card.value} 
                alt="Card" 
-               className="w-full h-full object-contain"
+               className="w-full h-full object-contain drop-shadow-md"
              />
           ) : (
             // Fantasy Sprite Sheet
-            // 4x4 grid (16 icons)
             <div 
-              className="w-full h-full"
+              className="w-full h-full filter drop-shadow-[0_0_2px_rgba(0,0,0,0.1)]"
               style={{
                 backgroundImage: "url('/images/fantasy_sprites.png')",
                 backgroundSize: "400% 400%",

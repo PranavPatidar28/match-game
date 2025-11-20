@@ -1,18 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import { useGame } from "@/hooks/useGame";
 import { StartScreen } from "@/components/StartScreen";
 import { Board } from "@/components/Board";
 import { HUD } from "@/components/HUD";
 import { EndScreen } from "@/components/EndScreen";
+import { ExitConfirmDialog } from "@/components/ExitConfirmDialog";
 
 
 
 export default function Home() {
   const { gameState, startGame, restartGame, goToMenu, handleCardClick, isLocked, mismatchedCards, highScores, isNewRecord } = useGame();
+  const [showExitDialog, setShowExitDialog] = useState(false);
+
+  const handleExitRequest = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleExitConfirm = () => {
+    setShowExitDialog(false);
+    goToMenu();
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 flex flex-col items-center">
+    <main className="min-h-screen py-8 px-4 flex flex-col items-center">
       {gameState.status === "idle" && (
         <StartScreen onStart={startGame} highScores={highScores} />
       )}
@@ -25,7 +37,7 @@ export default function Home() {
             matches={gameState.matchesFound}
             totalPairs={gameState.cards.length / 2}
             onRestart={restartGame}
-            onHome={goToMenu}
+            onHome={handleExitRequest}
             playerName={gameState.playerName}
           />
           <Board
@@ -41,6 +53,13 @@ export default function Home() {
       {gameState.status === "won" && (
         <EndScreen gameState={gameState} onRestart={restartGame} onHome={goToMenu} isNewRecord={isNewRecord} />
       )}
+
+      <ExitConfirmDialog
+        isOpen={showExitDialog}
+        onClose={() => setShowExitDialog(false)}
+        onConfirm={handleExitConfirm}
+        hasProgress={gameState.moves > 0}
+      />
     </main>
   );
 }

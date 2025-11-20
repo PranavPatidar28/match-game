@@ -32,3 +32,21 @@ export interface Theme {
   type: ThemeType;
   src: string | string[]; // Sprite URL or array of image URLs
 }
+
+export interface UITheme {
+  id: string;
+  name: string;
+  colors: {
+    background: string;
+    foreground: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    surface: string;
+  };
+  gradients: {
+    body: [string, string];
+    button: [string, string];
+    card: [string, string];
+  };
+}
