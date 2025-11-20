@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, Difficulty, GameState } from "@/types";
 import { generateDeck } from "@/lib/game";
+import { supabase } from "@/lib/supabaseClient";
 
 const STORAGE_KEY = "memory-game-state";
 const HIGH_SCORES_KEY = "memory-game-high-scores";
@@ -32,33 +33,85 @@ export function useGame() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
 
-  // Load from LocalStorage on mount
+  // Load from LocalStorage and Supabase on mount
   useEffect(() => {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState);
-        setGameState(parsed);
-      } catch (e) {
-        console.error("Failed to load game state", e);
+    const loadGame = async () => {
+      // 1. Load High Scores (Local Only for now)
+      const savedScores = localStorage.getItem(HIGH_SCORES_KEY);
+      if (savedScores) {
+        try {
+          setHighScores(JSON.parse(savedScores));
+        } catch (e) {
+          console.error("Failed to load high scores", e);
+        }
       }
-    }
 
-    const savedScores = localStorage.getItem(HIGH_SCORES_KEY);
-    if (savedScores) {
-      try {
-        setHighScores(JSON.parse(savedScores));
-      } catch (e) {
-        console.error("Failed to load high scores", e);
+      // 2. Load Game State
+      // First check local storage for immediate feedback
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          setGameState(parsed);
+        } catch (e) {
+          console.error("Failed to load local game state", e);
+        }
       }
-    }
-    setIsLoaded(true);
+
+      // Then check Supabase if user is logged in
+      const userId = localStorage.getItem("memory_game_user_id");
+      if (userId) {
+        try {
+          const { data } = await supabase
+            .from("game_progress")
+            .select("state")
+            .eq("user_id", userId)
+            .single();
+
+          if (data?.state) {
+            // Optional: Conflict resolution strategy. For now, cloud wins if it exists.
+            // Or prompt user? Let's just use cloud if it's playing.
+            const cloudState = data.state as GameState;
+            if (cloudState.status === 'playing') {
+               setGameState(cloudState);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load cloud game state", error);
+        }
+      }
+      
+      setIsLoaded(true);
+    };
+
+    loadGame();
   }, []);
 
-  // Save to LocalStorage whenever state changes
+  // Save to LocalStorage and Supabase whenever state changes
   useEffect(() => {
-    if (isLoaded && gameState.status !== "idle") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+    if (!isLoaded || gameState.status === "idle") return;
+
+    // Local Save
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+
+    // Cloud Save (Debounced)
+    const userId = localStorage.getItem("memory_game_user_id");
+    if (userId) {
+      const saveToCloud = setTimeout(async () => {
+        try {
+          await supabase
+            .from("game_progress")
+            .upsert({ 
+              user_id: userId, 
+              state: gameState,
+              updated_at: new Date().toISOString()
+            });
+        } catch (error) {
+          console.error("Failed to save to cloud", error);
+        }
+      }, 2000); // Save every 2 seconds to avoid spamming
+
+      return () => clearTimeout(saveToCloud);
     }
   }, [gameState, isLoaded]);
 
@@ -179,6 +232,11 @@ export function useGame() {
     setFlippedCards([]);
     setMismatchedCards([]);
     setIsLocked(false);
+    
+    // Clear cloud save on exit? Or keep it?
+    // Let's keep it so they can resume later if they want.
+    // But if they explicitly quit, maybe we should clear it?
+    // For now, let's just set status to idle in local state.
   };
 
   return {

@@ -1,6 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Difficulty, Theme } from "@/types";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Cloud, Images } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { ImageSelector } from "./ImageSelector";
 
 interface StartScreenProps {
   onStart: (name: string, difficulty: Difficulty, customImages?: string[]) => void;
@@ -16,42 +18,69 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
   const [name, setName] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("4x4");
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
-  const [isUploading, setIsUploading] = useState(false);
   const [customImages, setCustomImages] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-
-    setIsUploading(true);
-    const files = Array.from(e.target.files);
-    const uploadedUrls: string[] = [];
-
-    try {
-      for (const file of files) {
-        const response = await fetch(`/api/upload?filename=${file.name}`, {
-          method: 'POST',
-          body: file,
-        });
-        const newBlob = await response.json();
-        uploadedUrls.push(newBlob.url);
+  // Initialize User ID and Profile
+  useEffect(() => {
+    const initUser = async () => {
+      let storedId = localStorage.getItem("memory_game_user_id");
+      if (!storedId) {
+        storedId = crypto.randomUUID();
+        localStorage.setItem("memory_game_user_id", storedId);
       }
-      setCustomImages(uploadedUrls);
-      setTheme({ id: 'custom', name: 'Custom Uploads', type: 'custom', src: uploadedUrls });
-    } catch (error) {
-      console.error("Upload failed", error);
-      alert("Failed to upload images");
-    } finally {
-      setIsUploading(false);
+      setUserId(storedId);
+
+      // Fetch profile and uploads
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", storedId)
+          .single();
+
+        if (profile?.username) {
+          setName(profile.username);
+        }
+
+        // We don't need to fetch uploads here anymore, ImageSelector handles it.
+        // But we might want to fetch them to check if user has ANY uploads to show "My Uploads" button state?
+        // For now, let's just rely on the modal.
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    initUser();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim() && userId) {
+      // Sync name to Supabase
+      try {
+        await supabase
+          .from("profiles")
+          .upsert({ id: userId, username: name.trim() });
+      } catch (error) {
+        console.error("Failed to sync profile", error);
+      }
+
+      onStart(name.trim(), difficulty, theme.type === 'custom' ? customImages : undefined);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      onStart(name.trim(), difficulty, theme.type === 'custom' ? (theme.src as string[]) : undefined);
-    }
-  };
+  if (isLoadingProfile) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin text-indigo-600" size={48} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] w-full max-w-md mx-auto p-8 bg-white rounded-3xl shadow-xl border border-gray-100">
@@ -65,15 +94,19 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Player Name
           </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
-            placeholder="Enter your name"
-            required
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+              placeholder="Enter your name"
+              required
+            />
+            <Cloud className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+          <p className="text-xs text-gray-400 text-right">Synced to Cloud ☁️</p>
         </div>
 
         <div className="space-y-2">
@@ -132,40 +165,49 @@ export function StartScreen({ onStart, highScores }: StartScreenProps) {
             </button>
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                setTheme({ id: 'custom', name: 'Custom Uploads', type: 'custom', src: [] });
+                setIsImageSelectorOpen(true);
+              }}
               className={`flex-1 p-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
                 theme.id === 'custom'
                   ? "border-indigo-600 bg-indigo-50 text-indigo-700"
                   : "border-gray-200 hover:border-gray-300 text-gray-600"
               }`}
             >
-              {isUploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-              {customImages.length > 0 ? `${customImages.length} Images` : "Upload"}
+              <Images size={18} />
+              {customImages.length > 0 ? `${customImages.length} Selected` : "Manage Images"}
             </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleUpload}
-              className="hidden"
-              multiple
-              accept="image/*"
-            />
           </div>
-          {theme.id === 'custom' && customImages.length < 8 && (
-            <p className="text-xs text-amber-600">
-              Upload at least 8 images for 4x4 or 18 for 6x6.
+          
+          {theme.id === 'custom' && (
+            <p className="text-xs text-gray-500">
+              {customImages.length} images selected. 
+              {customImages.length < (difficulty === '4x4' ? 8 : 18) && (
+                <span className="text-indigo-600 ml-1">
+                  (Remaining tiles will use default icons)
+                </span>
+              )}
             </p>
           )}
         </div>
 
         <button
           type="submit"
-          disabled={!name.trim() || (theme.id === 'custom' && customImages.length === 0) || isUploading}
+          disabled={!name.trim()}
           className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform transition-all active:scale-[0.98]"
         >
           Start Game
         </button>
       </form>
+
+      <ImageSelector
+        isOpen={isImageSelectorOpen}
+        onClose={() => setIsImageSelectorOpen(false)}
+        userId={userId}
+        selectedImages={customImages}
+        onSelectionChange={setCustomImages}
+      />
     </div>
   );
 }

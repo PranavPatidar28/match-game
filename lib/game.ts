@@ -19,15 +19,21 @@ export function generateDeck(difficulty: Difficulty, customImages?: string[]): C
   let selectedValues: string[] = [];
 
   if (customImages && customImages.length > 0) {
-    // Use custom images
-    // If we don't have enough custom images, we might need to cycle or error.
-    // For MVP, assume we have enough or cycle.
-    selectedValues = customImages.slice(0, pairCount);
+    // Use custom images first, then fill with default sprites
+    const totalSprites = 16;
     
-    // If not enough, repeat
-    while (selectedValues.length < pairCount) {
-      selectedValues = [...selectedValues, ...customImages].slice(0, pairCount);
+    // 1. Take as many custom images as we have (up to pairCount)
+    const customSubset = customImages.slice(0, pairCount);
+    
+    // 2. If we need more, fill with sprite indices
+    const remainingCount = pairCount - customSubset.length;
+    let defaultSubset: string[] = [];
+    
+    if (remainingCount > 0) {
+      defaultSubset = Array.from({ length: remainingCount }, (_, i) => (i % totalSprites).toString());
     }
+    
+    selectedValues = [...customSubset, ...defaultSubset];
   } else {
     // Use sprite indices (0-15 for 4x4 sheet)
     // For 6x6 (18 pairs), we need to reuse 2 sprites

@@ -78,7 +78,7 @@ export function Tile({ card, onClick, disabled, isShaking }: TileProps) {
 
         {/* Back (Revealed state) */}
         <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200 flex items-center justify-center p-2">
-          {card.value.startsWith('http') || card.value.startsWith('/') ? (
+          {(card.value || '').startsWith('http') || (card.value || '').startsWith('/') ? (
              // Custom Image
              // eslint-disable-next-line @next/next/no-img-element
              <img 
