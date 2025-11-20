@@ -73,7 +73,6 @@ export function Tile({ card, onClick, disabled, isShaking }: TileProps) {
       >
         {/* Front (Hidden state) */}
         <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-[var(--gradient-card-from)] to-[var(--gradient-card-to)] rounded-xl shadow-inner border border-white/20 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10 mix-blend-overlay"></div>
           <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
             <span className="text-2xl font-bold text-white/80">?</span>
           </div>
