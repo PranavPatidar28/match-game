@@ -29,9 +29,10 @@ export function generateDeck(difficulty: Difficulty, customImages?: string[]): C
       selectedValues = [...selectedValues, ...customImages].slice(0, pairCount);
     }
   } else {
-    // Use sprite indices
-    const selectedIndices = SPRITE_INDICES.slice(0, pairCount);
-    selectedValues = selectedIndices.map(i => i.toString());
+    // Use sprite indices (0-15 for 4x4 sheet)
+    // For 6x6 (18 pairs), we need to reuse 2 sprites
+    const totalSprites = 16;
+    selectedValues = Array.from({ length: pairCount }, (_, i) => (i % totalSprites).toString());
   }
   
   const deck: Card[] = [];

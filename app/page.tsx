@@ -6,11 +6,10 @@ import { Board } from "@/components/Board";
 import { HUD } from "@/components/HUD";
 import { EndScreen } from "@/components/EndScreen";
 
-import { useSound } from "@/hooks/useSound";
+
 
 export default function Home() {
-  const { playSound, isMuted, toggleMute } = useSound();
-  const { gameState, startGame, restartGame, goToMenu, handleCardClick, isLocked, mismatchedCards, highScores, isNewRecord } = useGame({ playSound });
+  const { gameState, startGame, restartGame, goToMenu, handleCardClick, isLocked, mismatchedCards, highScores, isNewRecord } = useGame();
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 flex flex-col items-center">
@@ -28,8 +27,6 @@ export default function Home() {
             onRestart={restartGame}
             onHome={goToMenu}
             playerName={gameState.playerName}
-            isMuted={isMuted}
-            toggleMute={toggleMute}
           />
           <Board
             cards={gameState.cards}

@@ -10,11 +10,7 @@ interface HighScores {
   "6x6": { moves: number; time: number };
 }
 
-interface UseGameOptions {
-  playSound?: (type: 'flip' | 'match' | 'mismatch' | 'win') => void;
-}
-
-export function useGame({ playSound }: UseGameOptions = {}) {
+export function useGame() {
   const [gameState, setGameState] = useState<GameState>({
     cards: [],
     moves: 0,
@@ -103,7 +99,6 @@ export function useGame({ playSound }: UseGameOptions = {}) {
     if (isLocked || clickedCard.isFlipped || clickedCard.isMatched) return;
 
     // Flip the card
-    playSound?.('flip');
     setGameState((prev) => ({
       ...prev,
       cards: prev.cards.map((card) =>
@@ -123,14 +118,12 @@ export function useGame({ playSound }: UseGameOptions = {}) {
       if (first.value === second.value) {
         // Match found
         setTimeout(() => {
-          playSound?.('match');
           setGameState((prev) => {
             const newMatches = prev.matchesFound + 1;
             const totalPairs = prev.cards.length / 2;
             const newStatus = newMatches === totalPairs ? "won" : "playing";
+            
             if (newStatus === "won") {
-              playSound?.('win');
-              
               // Check for high score (prioritize moves, then time)
               const currentBest = highScores[prev.difficulty];
               const isBestMoves = prev.moves + 1 < currentBest.moves;
@@ -148,6 +141,7 @@ export function useGame({ playSound }: UseGameOptions = {}) {
                 setIsNewRecord(false);
               }
             }
+            
             return {
               ...prev,
               cards: prev.cards.map((card) =>
@@ -164,7 +158,6 @@ export function useGame({ playSound }: UseGameOptions = {}) {
         // No match
         setMismatchedCards([first.id, second.id]);
         setTimeout(() => {
-          playSound?.('mismatch');
           setGameState((prev) => ({
             ...prev,
             cards: prev.cards.map((card) =>
@@ -179,7 +172,7 @@ export function useGame({ playSound }: UseGameOptions = {}) {
         }, 1000);
       }
     }
-  }, [flippedCards, isLocked]);
+  }, [flippedCards, isLocked, highScores]);
 
   const goToMenu = () => {
     setGameState(prev => ({ ...prev, status: "idle" }));

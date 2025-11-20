@@ -1,5 +1,5 @@
 import { cn, formatTime } from "@/lib/utils";
-import { Volume2, VolumeX, RotateCcw, Home } from "lucide-react";
+import { RotateCcw, Home } from "lucide-react";
 
 interface HUDProps {
   moves: number;
@@ -9,11 +9,9 @@ interface HUDProps {
   onRestart: () => void;
   onHome: () => void;
   playerName: string;
-  isMuted: boolean;
-  toggleMute: () => void;
 }
 
-export function HUD({ moves, time, matches, totalPairs, onRestart, onHome, playerName, isMuted, toggleMute }: HUDProps) {
+export function HUD({ moves, time, matches, totalPairs, onRestart, onHome, playerName }: HUDProps) {
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-between bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 mb-6 gap-4">
       <div className="flex items-center gap-6">
@@ -37,14 +35,6 @@ export function HUD({ moves, time, matches, totalPairs, onRestart, onHome, playe
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          onClick={toggleMute}
-          className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
-          title={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        </button>
-
         <button
           onClick={onHome}
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"

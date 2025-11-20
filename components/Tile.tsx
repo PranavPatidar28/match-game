@@ -87,12 +87,13 @@ export function Tile({ card, onClick, disabled, isShaking }: TileProps) {
                className="w-full h-full object-contain"
              />
           ) : (
-            // Sprite Sheet
+            // Fantasy Sprite Sheet
+            // 4x4 grid (16 icons)
             <div 
               className="w-full h-full"
               style={{
-                backgroundImage: "url('/images/game_sprites.png')",
-                backgroundSize: "400% 400%", // 4x4 grid
+                backgroundImage: "url('/images/fantasy_sprites.png')",
+                backgroundSize: "400% 400%",
                 backgroundPosition: `${(parseInt(card.value) % 4) * (100 / 3)}% ${Math.floor(parseInt(card.value) / 4) * (100 / 3)}%`,
                 backgroundRepeat: "no-repeat"
               }}
