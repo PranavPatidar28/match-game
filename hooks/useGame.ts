@@ -181,10 +181,18 @@ export function useGame({ playSound }: UseGameOptions = {}) {
     }
   }, [flippedCards, isLocked]);
 
+  const goToMenu = () => {
+    setGameState(prev => ({ ...prev, status: "idle" }));
+    setFlippedCards([]);
+    setMismatchedCards([]);
+    setIsLocked(false);
+  };
+
   return {
     gameState,
     startGame,
     restartGame,
+    goToMenu,
     handleCardClick,
     isLocked,
     isLoaded,

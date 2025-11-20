@@ -4,10 +4,11 @@ import { Confetti } from "./Confetti";
 interface EndScreenProps {
   gameState: GameState;
   onRestart: () => void;
+  onHome: () => void;
   isNewRecord: boolean;
 }
 
-export function EndScreen({ gameState, onRestart, isNewRecord }: EndScreenProps) {
+export function EndScreen({ gameState, onRestart, onHome, isNewRecord }: EndScreenProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] w-full max-w-md mx-auto p-8 bg-white rounded-3xl shadow-xl border border-gray-100 text-center animate-in fade-in zoom-in duration-300">
       <Confetti />
@@ -21,25 +22,24 @@ export function EndScreen({ gameState, onRestart, isNewRecord }: EndScreenProps)
       </div>
       
       <h2 className="text-3xl font-bold text-gray-800 mb-2">Great Job, {gameState.playerName}!</h2>
-      <p className="text-gray-500 mb-8">You completed the {gameState.difficulty} board.</p>
+      <p className="text-gray-600 mb-8">
+        You completed the {gameState.difficulty} puzzle in <span className="font-bold text-indigo-600">{gameState.moves} moves</span> and <span className="font-bold text-indigo-600">{gameState.time}s</span>.
+      </p>
 
-      <div className="grid grid-cols-2 gap-4 w-full mb-8">
-        <div className="bg-gray-50 p-4 rounded-2xl">
-          <span className="block text-sm text-gray-500 mb-1">Time</span>
-          <span className="block text-2xl font-bold text-gray-800">{gameState.time}s</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-2xl">
-          <span className="block text-sm text-gray-500 mb-1">Moves</span>
-          <span className="block text-2xl font-bold text-gray-800">{gameState.moves}</span>
-        </div>
+      <div className="flex flex-col gap-3 w-full">
+        <button
+          onClick={onRestart}
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors"
+        >
+          Play Again
+        </button>
+        <button
+          onClick={onHome}
+          className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+        >
+          Main Menu
+        </button>
       </div>
-
-      <button
-        onClick={onRestart}
-        className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-colors"
-      >
-        Play Again
-      </button>
     </div>
   );
 }

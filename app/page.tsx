@@ -10,7 +10,7 @@ import { useSound } from "@/hooks/useSound";
 
 export default function Home() {
   const { playSound, isMuted, toggleMute } = useSound();
-  const { gameState, startGame, restartGame, handleCardClick, isLocked, mismatchedCards, highScores, isNewRecord } = useGame({ playSound });
+  const { gameState, startGame, restartGame, goToMenu, handleCardClick, isLocked, mismatchedCards, highScores, isNewRecord } = useGame({ playSound });
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 flex flex-col items-center">
@@ -19,29 +19,30 @@ export default function Home() {
       )}
 
       {gameState.status === "playing" && (
-        <div className="w-full max-w-4xl flex flex-col items-center animate-in fade-in duration-500">
+        <>
           <HUD
             moves={gameState.moves}
             time={gameState.time}
             matches={gameState.matchesFound}
             totalPairs={gameState.cards.length / 2}
             onRestart={restartGame}
+            onHome={goToMenu}
             playerName={gameState.playerName}
             isMuted={isMuted}
             toggleMute={toggleMute}
           />
           <Board
             cards={gameState.cards}
-            difficulty={gameState.difficulty}
             onCardClick={handleCardClick}
             isLocked={isLocked}
+            difficulty={gameState.difficulty}
             mismatchedCards={mismatchedCards}
           />
-        </div>
+        </>
       )}
 
       {gameState.status === "won" && (
-        <EndScreen gameState={gameState} onRestart={restartGame} isNewRecord={isNewRecord} />
+        <EndScreen gameState={gameState} onRestart={restartGame} onHome={goToMenu} isNewRecord={isNewRecord} />
       )}
     </main>
   );

@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import { Volume2, VolumeX } from "lucide-react";
+import { cn, formatTime } from "@/lib/utils";
+import { Volume2, VolumeX, RotateCcw, Home } from "lucide-react";
 
 interface HUDProps {
   moves: number;
@@ -7,18 +7,13 @@ interface HUDProps {
   matches: number;
   totalPairs: number;
   onRestart: () => void;
+  onHome: () => void;
   playerName: string;
   isMuted: boolean;
   toggleMute: () => void;
 }
 
-export function HUD({ moves, time, matches, totalPairs, onRestart, playerName, isMuted, toggleMute }: HUDProps) {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
+export function HUD({ moves, time, matches, totalPairs, onRestart, onHome, playerName, isMuted, toggleMute }: HUDProps) {
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-between bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 mb-6 gap-4">
       <div className="flex items-center gap-6">
@@ -51,10 +46,20 @@ export function HUD({ moves, time, matches, totalPairs, onRestart, playerName, i
         </button>
 
         <button
-          onClick={onRestart}
-          className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-full transition-colors shadow-md hover:shadow-lg active:scale-95 transform duration-100"
+          onClick={onHome}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+          title="Main Menu"
         >
-          Restart
+          <Home size={18} />
+          <span className="hidden sm:inline">Home</span>
+        </button>
+
+        <button
+          onClick={onRestart}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-medium transition-colors"
+        >
+          <RotateCcw size={18} />
+          <span className="hidden sm:inline">Restart</span>
         </button>
       </div>
     </div>
